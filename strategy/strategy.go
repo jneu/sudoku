@@ -1,24 +1,21 @@
 package strategy
 
-type Assertion struct {
-	value     int
-	cellIndex int
-}
+import "github.com/jneu/sudoku/common"
 
 type Implementation interface {
-	Process(message *Assertion) (done bool)
+	Process(message *common.Assertion) (done bool)
 }
 
 type Strategy struct {
 	impl     *Implementation
-	incoming <-chan *Assertion
-	outgoing chan<- *Assertion
+	incoming <-chan *common.Assertion
+	outgoing chan<- *common.Assertion
 }
 
-func New(impl *Implementation, awaitingProcessing chan<- *Assertion) *Strategy {
+func New(impl *Implementation, awaitingProcessing chan<- *common.Assertion) *Strategy {
 	return &Strategy{
 		impl,
-		make(chan *Assertion),
+		make(chan *common.Assertion),
 		awaitingProcessing,
 	}
 }

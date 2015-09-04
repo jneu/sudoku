@@ -1,5 +1,8 @@
 package sudoku
 
+import "github.com/jneu/sudoku/common"
+import "github.com/jneu/sudoku/strategy"
+
 type Cell struct {
 	value    uint8
 	rejected [9]bool
@@ -8,21 +11,15 @@ type Cell struct {
 type Game struct {
 	cells [9 * 9]Cell
 
-	strategies []Strategy
-	in         chan *AssertionMessage
-}
-
-type AssertionMessage struct {
-	positive bool
-	index    int // [0, 9*9)
-	value    int // [1, 9]
+	strategies []strategy.Strategy
+	in         chan *common.Assertion
 }
 
 func (g *Game) initializeStrategies(initial string) {
 	for i, c := range initial {
 		value := int(c) - 48
 		if value >= 1 && value <= 9 {
-			g.in <- &AssertionMessage{true, i, value}
+			g.in <- &common.Assertion{value, i}
 		} else {
 			g.strategies = append(g.strategies, NewCellStrategy(i, g.in))
 		}
@@ -34,7 +31,7 @@ func Solve(initial string) {
 		// This buffer should be large enough to handle at least one positive
 		// assertion for each cell. These are generated when we initialize our
 		// strategies and we don't want to block when we add them.
-		in: make(chan *AssertionMessage, 9*9),
+		in: make(chan *common.Assertion, 9*9),
 	}
 
 	game.initializeStrategies(initial)
